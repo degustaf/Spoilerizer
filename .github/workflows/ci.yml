@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: GCC version
+      run: gcc --version
+
+    - name: Build
+      run: make
+
