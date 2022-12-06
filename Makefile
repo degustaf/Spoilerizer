@@ -7,12 +7,14 @@ PATHI =				include
 PATHB = 			build
 PATHD =				depend
 SRCS =				$(wildcard $(PATHS)/*.cpp)
-LIBRARY =			libaoc.a
+PATHDPP =           DPP/build
+PATHDPPI =          DPP/include/dpp
+LIBDPP =			$(PATHDPP)/library/libdpp.so
 CXX = 				g++
 LINK = 				$(CXX)
 CXX_STD =			c++17
 DEF =				-g
-CXXFLAGS =			-I$(PATHI) -Wall -Wextra -Werror -pedantic $(ARCH) -std=$(CXX_STD) -O3 -D_POSIX_C_SOURCE=200809L $(DEF)
+CXXFLAGS =			-I$(PATHI) -I$(PATHDPPI) -Wall -Wextra -Werror -pedantic $(ARCH) -std=$(CXX_STD) -O3 -D_POSIX_C_SOURCE=200809L $(DEF)
 
 LDFLAGS =			$(ARCH) $(DEF)
 LDLIBS =			-pthread
@@ -43,12 +45,18 @@ $(PATHD):
 spoilerizer: $(PATHB)/spoilerizer | $(PATHB)
 	ln -sf $^ $@
 
-$(PATHB)/%: $(PATHB)/%.o | $(PATHB)
+$(PATHB)/%: $(PATHB)/%.o $(LIBDPP) | $(PATHB)
 	$(LINK) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(PATHB)/%.o: $(PATHS)/%.cpp | $(PATHB) $(PATHD)
 	$(COMPILE) -c $< -o $@
 	$(POSTCOMPILE)
+
+$(PATHDPP):
+	$(MKDIR) $@ && cd $@ && cmake ..
+
+$(LIBDPP): | $(PATHDPP)
+	$(MAKE) -C $| dpp
 
 clean:
 	$(RM) $(PATHD)/*.d
